@@ -1,0 +1,10 @@
+Execício 1) Crie uma função que recebe por parâmetro 3 lados de um triângulo e retorne um inteiro que irá indicar: 0 - Não é triângulo | 1-Equilátero | 2-Isósceles |3-Escaleno 
+
+Exercício 2) Crie uma função que recebe 2 números por parâmetro e retorne o MDC desses números.
+
+Exercício 3) Crie uma função que recebe uma data e verifique se a data é válida. A função deverá retornar um valor booleano.
+
+Exercício 4) Crie um menu que oferece opções para o usuário poder entrar com os dados das questões (1,2 e 3).
+
+
+Exemplo de menu: https://replit.com/@sandrojeronimo/ExemploMenu

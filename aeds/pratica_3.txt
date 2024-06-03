@@ -1,0 +1,11 @@
+1) Acesse o Sistema Verde
+
+http://verde.icei.pucminas.br
+
+Links to an external site. 
+
+2) Resolva o exercício: "Soma e média das notas (Prof. Sandro)"
+
+3) Resolva o exercício: "Par ou ímpar (Prof. Sandro)"
+
+Você deverá enviar os algoritmo em linguagem c para que o sistema verde faça a correção. Avalie os resultados.

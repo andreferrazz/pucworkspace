@@ -1,0 +1,4 @@
+Esta tarefa consiste em: 
+
+    Criar um projeto no Codebocks. Compilar e executar. Alterar a mensagem que está sendo exibida para o usuário.
+    Criar a versão do algoritmo  anterior no replit.com. Compilar e executar.
