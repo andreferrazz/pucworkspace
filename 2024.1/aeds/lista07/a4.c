@@ -4,25 +4,25 @@
 #include <string.h>
 
 struct Animal {
-    char nome[100];
-    char nome_cientifico[100];
-    char is_wild[10];
-    int max_weitgh;
+    char name[100];
+    char scientific_name[100];
+    char is_domestic[10];
+    int max_weight;
     int max_age;
 } Animal;
 
 void print(struct Animal animal) {
     printf("Animal{ \n");
-    printf("    nome: %s\n", animal.nome);
-    printf("    nome_cientifico: %s\n", animal.nome_cientifico);
-    printf("    is_wild: %s\n", animal.is_wild);
-    printf("    max_weitgh: %d\n", animal.max_weitgh);
+    printf("    name: %s\n", animal.name);
+    printf("    scientific_name: %s\n", animal.scientific_name);
+    printf("    is_domestic: %s\n", animal.is_domestic);
+    printf("    max_weitgh: %d\n", animal.max_weight);
     printf("    max_age: %d\n", animal.max_age);
     printf("}\n");
 }
 
 int main() {
-    FILE *input = fopen("a1.txt", "r");
+    FILE *input = fopen("arquivo-01.txt", "r");
     struct Animal animals[20];
     int size = 0;
     char row[100];
@@ -33,19 +33,19 @@ int main() {
 
         char *token = strtok(row, ";");
         if (token == NULL) continue;
-        strcpy(animals[size].nome, token);
+        strcpy(animals[size].name, token);
 
         token = strtok(NULL, ";");
         if (token == NULL) continue;
-        strcpy(animals[size].nome_cientifico, token);
+        strcpy(animals[size].scientific_name, token);
         
         token = strtok(NULL, ";");
         if (token == NULL) continue;
-        strcpy(animals[size].is_wild, token);
+        strcpy(animals[size].is_domestic, token);
         
         token = strtok(NULL, ";");
         if (token == NULL) continue;
-        animals[size].max_weitgh = atoi(token);
+        animals[size].max_weight = atoi(token);
 
         token = strtok(NULL, ";");
         if (token == NULL) continue;
@@ -58,7 +58,7 @@ int main() {
 
     for (int i = 0; i < size; i++) {
         if (animals[i].max_age > 10 && animals[i].max_age < 16) {
-            puts(animals[i].nome);
+            puts(animals[i].name);
         }
     }
 }

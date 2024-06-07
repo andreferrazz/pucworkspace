@@ -4,25 +4,25 @@
 #include <string.h>
 
 struct Animal {
-    char nome[100];
-    char nome_cientifico[100];
-    char is_wild[10];
-    int max_weitgh;
+    char name[100];
+    char scientific_name[100];
+    char is_domestic[10];
+    int max_weight;
     int max_age;
 } Animal;
 
 void print(struct Animal animal) {
     printf("Animal{ \n");
-    printf("    nome: %s\n", animal.nome);
-    printf("    nome_cientifico: %s\n", animal.nome_cientifico);
-    printf("    is_wild: %s\n", animal.is_wild);
-    printf("    max_weitgh: %d\n", animal.max_weitgh);
+    printf("    name: %s\n", animal.name);
+    printf("    scientific_name: %s\n", animal.scientific_name);
+    printf("    is_wild: %s\n", animal.is_domestic);
+    printf("    max_weitgh: %d\n", animal.max_weight);
     printf("    max_age: %d\n", animal.max_age);
     printf("}\n");
 }
 
 void get_animals(struct Animal *animals, int *size) {
-    FILE *input = fopen("a1.txt", "r");
+    FILE *input = fopen("arquivo-01.txt", "r");
     int idx = 0;
     char row[100];
     
@@ -34,22 +34,22 @@ void get_animals(struct Animal *animals, int *size) {
         char *token = strtok(row, ";");
         if (token == NULL)
             continue;
-        strcpy(animals[idx].nome, token);
+        strcpy(animals[idx].name, token);
 
         token = strtok(NULL, ";");
         if (token == NULL)
             continue;
-        strcpy(animals[idx].nome_cientifico, token);
+        strcpy(animals[idx].scientific_name, token);
 
         token = strtok(NULL, ";");
         if (token == NULL)
             continue;
-        strcpy(animals[idx].is_wild, token);
+        strcpy(animals[idx].is_domestic, token);
 
         token = strtok(NULL, ";");
         if (token == NULL)
             continue;
-        animals[idx].max_weitgh = atoi(token);
+        animals[idx].max_weight = atoi(token);
 
         token = strtok(NULL, ";");
         if (token == NULL)
@@ -65,7 +65,7 @@ void get_animals(struct Animal *animals, int *size) {
 }
 
 void get_intervals(int intervals[20][2], int *size) {
-    FILE *input = fopen("a2.txt", "r");
+    FILE *input = fopen("arquivo-02.txt", "r");
     int idx = 0;
     char row[100];
     
@@ -103,5 +103,10 @@ int main() {
 
     for (int i = 0; i < intervals_size; i++) {
         printf("[%d, %d]\n", intervals[i][0], intervals[i][1]);
+        for (int j = 0; j < animals_size; j++) {
+            if (intervals[i][0] <= animals[j].max_weight && animals[j].max_weight <= intervals[i][1]) {
+                printf("    %s\n", animals[j].name);
+            }
+        }
     }
 }

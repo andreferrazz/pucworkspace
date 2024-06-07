@@ -2,7 +2,7 @@
 #include <string.h>
 
 int main() {
-    FILE *fptr = fopen("a1.txt", "r");
+    FILE *fptr = fopen("arquivo-01.txt", "r");
     char row[100];
     while (fgets(row, 100, fptr)) {
         char* token = strtok(row, ";");
