@@ -1,10 +1,9 @@
-int sensor(int d) {
-	int res = (d % 8) - 5;
-	return (res == -5) ? 3 : res;
-}
+import java.util.Scanner;
 
-void main() {
-	assert 1 == sensor(6);
-	assert 2 == sensor(23);
-	assert 3 == sensor(9192);
+void main(String... args) {
+	try (var scanner = new Scanner(System.in)) {
+		int d = scanner.nextInt();
+		int res = (d % 8) == 0 ? 3 : (d % 8) - 5;
+		System.out.print(res);
+	}
 }

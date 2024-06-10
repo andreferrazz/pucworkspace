@@ -1,12 +1,8 @@
-#include <assert.h>
-
-int sensor(int d) {
-    int res = (d % 8) - 5;
-    return (res == -5) ? 3 : res;
-}
+#include <stdio.h>
 
 int main() {
-    assert(1 == sensor(6));
-    assert(2 == sensor(23));
-    assert(3 == sensor(9192));
+    int d;
+    scanf("%d", &d);
+    int res = (d % 8) == 0 ? 3 : (d % 8) - 5;
+    printf("%d", res);
 }
