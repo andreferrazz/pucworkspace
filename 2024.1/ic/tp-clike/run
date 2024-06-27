@@ -1,0 +1,25 @@
+#!/bin/bash
+
+compile() {
+    echo "Compiling sources..."
+    javac --enable-preview --release 21 acelerador.java
+    gcc -o c acelerador.c
+    g++ -o cpp acelerador.cpp
+    echo
+}
+
+run() {
+    echo "Running... [input = $1]"
+    echo $1 | java --enable-preview acelerador
+    echo $1 | dotnet script acelerador.csx
+    echo $1 | ./c
+    echo $1 | ./cpp
+    echo $1 | python3 acelerador.py
+    echo
+}
+
+compile
+run "6"
+run "23"
+run "9192"
+run "5431"
