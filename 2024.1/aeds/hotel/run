@@ -1,1 +1,1 @@
-gcc -o main src/main.c -luuid && ./main < input
+gcc -o main src/main.c -luuid && ./main
