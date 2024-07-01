@@ -1,6 +1,6 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <uuid/uuid.h>
 
@@ -21,11 +21,11 @@ struct Funcionario {
 
 struct Estadia {
     char codigo[37];
+    int numero_quarto;
+    int qtd_diarias;
     time_t data_entrada;
     time_t data_saida;
-    int qtd_diarias;
-    char codigo_cliente[100];
-    char numero_quarto[100];
+    char codigo_cliente[37];
 } Estadia;
 
 struct Quarto {
@@ -34,6 +34,54 @@ struct Quarto {
     int valor_diaria;
     int status;
 } Quarto;
+
+struct ClienteList {
+    int capacity;
+    int size;
+    struct Cliente *elements;
+} ClienteList;
+
+struct ClienteList *empty_cliente_list() {
+    struct ClienteList *list = malloc(sizeof(struct ClienteList));
+    list->capacity = 10;
+    list->size = 0;
+    list->elements = malloc(list->capacity * sizeof(struct Cliente));
+    return list;
+}
+
+void add_cliente(struct ClienteList *list, struct Cliente element) {
+    list->elements[list->size++] = element;
+}
+
+struct EstadiaList {
+    int capacity;
+    int size;
+    struct Estadia *elements;
+} EstadiaList;
+
+struct EstadiaList *empty_estadia_list() {
+    struct EstadiaList *list = malloc(sizeof(struct EstadiaList));
+    list->capacity = 10;
+    list->size = 0;
+    list->elements = malloc(list->capacity * sizeof(struct Estadia));
+    return list;
+}
+
+void add_estadia(struct EstadiaList *list, struct Estadia element) {
+    list->elements[list->size++] = element;
+}
+
+const int DESOCUPADO = 0;
+const int OCUPADO = 1;
+
+int QTD_CLIENTES;
+struct Cliente *CLIENTES;
+int QTD_FUNCIONARIOS;
+struct Funcionario *FUNCIONARIOS;
+int QTD_ESTADIAS;
+struct Estadia *ESTADIAS;
+int QTD_QUARTOS;
+struct Quarto *QUARTOS;
 
 char *generate_uuid() {
     uuid_t uuid;
@@ -80,81 +128,28 @@ time_t parse_date(char *str) {
     return date;
 }
 
-void criar_cliente() {
-    char *nome = get_line("Entre com o nome: ");
-    char *telefone = get_line("Entre com o telefone: ");
-    char *endereco = get_line("Entre com o endereco: ");
-
-    struct Cliente cliente;
-    strcpy(cliente.codigo, generate_uuid());
-    strcpy(cliente.nome, nome);
-    strcpy(cliente.telefone, telefone);
-    strcpy(cliente.endereco, endereco);
-
-    FILE *file = fopen("db/cliente", "a");
-    fprintf(file, "%s;%s;%s;%s\n", cliente.codigo, cliente.nome, cliente.telefone, cliente.endereco);
+void load_quartos() {
+    FILE *file = fopen("db/quarto", "r");
+    QUARTOS = malloc(10 * sizeof(struct Quarto));
+    QTD_QUARTOS = 0;
+    int numero_quarto;
+    int qtd_hospedes;
+    int valor_diaria;
+    int status;
+    while (true) {
+        int a = fscanf(file, "%d;%d;%d;%d\n", &numero_quarto, &qtd_hospedes, &valor_diaria, &status);
+        if (a != 4) {
+            break;
+        }
+        struct Quarto quarto;
+        quarto.numero_quarto = numero_quarto;
+        quarto.qtd_hospedes = qtd_hospedes;
+        quarto.valor_diaria = valor_diaria;
+        quarto.status = status;
+        QUARTOS[QTD_QUARTOS++] = quarto;
+    }
     fclose(file);
 }
-
-void criar_funcionario() {
-    char *nome = get_line("Entre com o nome: ");
-    char *telefone = get_line("Entre com o telefone: ");
-    char *cargo = get_line("  [1] CARGO_1\n  [2] CARGO_2\n  [3] CARGO_3\nEscolha o cargo: ");
-    char *salario = get_line("Entre com o salario: ");
-
-    struct Funcionario model;
-    strcpy(model.codigo, generate_uuid());
-    strcpy(model.nome, nome);
-    strcpy(model.telefone, telefone);
-    strcpy(model.cargo, cargo);
-    model.salario = (atof(salario) * 100);
-
-    FILE *file = fopen("db/funcionario", "a");
-    fprintf(file, "%s;%s;%s;%s;%d\n", model.codigo, model.nome, model.telefone, model.cargo, model.salario);
-    fclose(file);
-}
-
-void criar_estadia() {
-    char *data_entrada = get_line("Data de entrada (DD/MM/AAAA): ");
-    char *data_saida = get_line("Data de saida (DD/MM/AAAA): ");
-    char *codigo_cliente = get_line("Entre com o codigo do cliente: ");
-    char *numero_quarto = get_line("  [1] QUARTO_1\n  [2] QUARTO_2\n  [3] QUARTO_3\nEscolha o quarto: ");
-
-    struct Estadia model;
-    strcpy(model.codigo, generate_uuid());
-    model.data_entrada = parse_date(data_entrada);
-    model.data_saida = parse_date(data_saida);
-    strcpy(model.codigo_cliente, codigo_cliente);
-    strcpy(model.numero_quarto, numero_quarto);
-    model.qtd_diarias = 2;
-
-    FILE *file = fopen("db/estadia", "a");
-    fprintf(file, "%s;%ld;%ld;%d;%s;%s\n", model.codigo, model.data_entrada, model.data_saida, model.qtd_diarias, model.codigo_cliente, model.numero_quarto);
-    fclose(file);
-}
-
-const int DESOCUPADO = 0;
-const int OCUPADO = 1;
-
-int QTD_CLIENTES;
-struct Cliente *CLIENTES;
-int QTD_FUNCIONARIOS;
-const struct Funcionario *FUNCIONARIOS;
-int QTD_ESTADIAS;
-const struct Estadia *ESTADIAS;
-#define QTD_QUARTOS 10
-const struct Quarto QUARTOS[QTD_QUARTOS] = {
-    { 1, 1, 10000, DESOCUPADO },
-    { 2, 2, 12000, DESOCUPADO },
-    { 3, 4, 16000, DESOCUPADO },
-    { 4, 6, 20000, DESOCUPADO },
-    { 5, 4, 16000, DESOCUPADO },
-    { 6, 2, 12000, DESOCUPADO },
-    { 7, 2, 12000, DESOCUPADO },
-    { 8, 2, 12000, DESOCUPADO },
-    { 9, 2, 12000, DESOCUPADO },
-    { 10, 1, 10000, DESOCUPADO }
-};
 
 void load_clientes() {
     FILE *file = fopen("db/cliente", "r");
@@ -163,8 +158,8 @@ void load_clientes() {
     char codigo[37];
     char nome[100];
     char telefone[30];
-    char endereco[100]; 
-    while(true) {
+    char endereco[100];
+    while (true) {
         int a = fscanf(file, "%36[^;];%[^;];%[^;];%[^\n]\n", codigo, nome, telefone, endereco);
         if (a != 4) {
             break;
@@ -179,18 +174,341 @@ void load_clientes() {
     fclose(file);
 }
 
-struct Estadia find_estadia(char *codigo_estadia) {
+void load_estadias() {
+    FILE *file = fopen("db/estadia", "r");
+    ESTADIAS = malloc(10 * sizeof(struct Estadia));
+    QTD_ESTADIAS = 0;
+    char codigo[37];
+    int numero_quarto;
+    int qtd_diarias;
+    time_t data_entrada;
+    time_t data_saida;
+    char codigo_cliente[37];
+    while (true) {
+        int a = fscanf(file, "%36[^;];%d;%d;%ld;%ld;%36[^\n]\n", codigo, &numero_quarto, &qtd_diarias, &data_entrada,
+                       &data_saida, codigo_cliente);
+        if (a != 6) {
+            break;
+        }
+        struct Estadia estadia;
+        strcpy(estadia.codigo, codigo);
+        estadia.numero_quarto = numero_quarto;
+        estadia.qtd_diarias = qtd_diarias;
+        estadia.data_entrada = data_entrada;
+        estadia.data_saida = data_saida;
+        strcpy(estadia.codigo_cliente, codigo_cliente);
+        ESTADIAS[QTD_ESTADIAS++] = estadia;
+    }
+    fclose(file);
+}
 
-} 
+void load_funcionarios() {
+    FILE *file = fopen("db/funcionario", "r");
+    FUNCIONARIOS = malloc(10 * sizeof(struct Funcionario));
+    QTD_FUNCIONARIOS = 0;
+    char codigo[37];
+    char nome[100];
+    char telefone[30];
+    char cargo[50];
+    int salario;
+    while (true) {
+        int a = fscanf(file, "%36[^;];%[^;];%[^;];%[^;];%d\n", codigo, nome, telefone, cargo, &salario);
+        if (a != 5) {
+            break;
+        }
+        struct Funcionario funcionario;
+        strcpy(funcionario.codigo, codigo);
+        strcpy(funcionario.nome, nome);
+        strcpy(funcionario.telefone, telefone);
+        strcpy(funcionario.cargo, cargo);
+        funcionario.salario = salario;
+        FUNCIONARIOS[QTD_FUNCIONARIOS++] = funcionario;
+    }
+    fclose(file);
+}
+
+void save_clientes() {
+    FILE *file = fopen("db/cliente", "w");
+    for (int i = 0; i < QTD_CLIENTES; i++) {
+        struct Cliente cliente = CLIENTES[i];
+        fprintf(file, "%s;%s;%s;%s\n", cliente.codigo, cliente.nome, cliente.telefone, cliente.endereco);
+    }
+    fclose(file);
+}
+
+void save_estadias() {
+    FILE *file = fopen("db/estadia", "w");
+    for (int i = 0; i < QTD_ESTADIAS; i++) {
+        struct Estadia estadia = ESTADIAS[i];
+        fprintf(file, "%s;%d;%d;%ld;%ld;%s\n", estadia.codigo, estadia.numero_quarto, estadia.qtd_diarias,
+                estadia.data_entrada, estadia.data_saida, estadia.codigo_cliente);
+    }
+    fclose(file);
+}
+
+void save_funcionarios() {
+    FILE *file = fopen("db/funcionario", "w");
+    for (int i = 0; i < QTD_FUNCIONARIOS; i++) {
+        struct Funcionario funcionario = FUNCIONARIOS[i];
+        fprintf(file, "%s;%s;%s;%s;%d\n", funcionario.codigo, funcionario.nome, funcionario.telefone, funcionario.cargo,
+                funcionario.salario);
+    }
+    fclose(file);
+}
+
+void criar_cliente() {
+    char *nome = get_line("Entre com o nome: ");
+    char *telefone = get_line("Entre com o telefone: ");
+    char *endereco = get_line("Entre com o endereco: ");
+
+    struct Cliente cliente;
+    strcpy(cliente.codigo, generate_uuid());
+    strcpy(cliente.nome, nome);
+    strcpy(cliente.telefone, telefone);
+    strcpy(cliente.endereco, endereco);
+    CLIENTES[QTD_CLIENTES++] = cliente;
+}
+
+void criar_estadia() {
+    char *data_entrada = get_line("Data de entrada (DD/MM/AAAA): ");
+    char *data_saida = get_line("Data de saida (DD/MM/AAAA): ");
+    char *codigo_cliente = get_line("Entre com o codigo do cliente: ");
+    // TODO: get quartos disponiveis
+    char *numero_quarto = get_line("  [1] QUARTO_1\n  [2] QUARTO_2\n  [3] QUARTO_3\nEscolha o quarto: ");
+
+    struct Estadia estadia;
+    strcpy(estadia.codigo, generate_uuid());
+    estadia.numero_quarto = atoi(numero_quarto);
+    estadia.data_entrada = parse_date(data_entrada);
+    estadia.data_saida = parse_date(data_saida);
+    estadia.qtd_diarias = (estadia.data_saida - estadia.data_entrada) / (60 * 60 * 24);
+    strcpy(estadia.codigo_cliente, codigo_cliente);
+    ESTADIAS[QTD_ESTADIAS++] = estadia;
+}
+
+void criar_funcionario() {
+    char *nome = get_line("Entre com o nome: ");
+    char *telefone = get_line("Entre com o telefone: ");
+    char *cargo = get_line("  [1] CARGO_1\n  [2] CARGO_2\n  [3] CARGO_3\nEscolha o cargo: ");
+    char *salario = get_line("Entre com o salario: ");
+
+    struct Funcionario funcionario;
+    strcpy(funcionario.codigo, generate_uuid());
+    strcpy(funcionario.nome, nome);
+    strcpy(funcionario.telefone, telefone);
+    strcpy(funcionario.cargo, cargo);
+    funcionario.salario = (atof(salario) * 100);
+    FUNCIONARIOS[QTD_FUNCIONARIOS++] = funcionario;
+}
+
+struct Quarto *find_quarto(int numero_quarto) {
+    for (int i = 0; i < QTD_QUARTOS; i++) {
+        if (QUARTOS[i].numero_quarto == numero_quarto) {
+            return &QUARTOS[i];
+        }
+    }
+}
+
+struct Cliente *find_cliente(char *codigo_cliente) {
+    for (int i = 0; i < QTD_CLIENTES; i++) {
+        if (strcmp(CLIENTES[i].codigo, codigo_cliente) == 0) {
+            return &CLIENTES[i];
+        }
+    }
+}
+
+struct Estadia *find_estadia(char *codigo_estadia) {
+    for (int i = 0; i < QTD_ESTADIAS; i++) {
+        if (strcmp(ESTADIAS[i].codigo, codigo_estadia) == 0) {
+            return &ESTADIAS[i];
+        }
+    }
+}
+
+struct EstadiaList *find_estadias_by_cliente(char *codigo_cliente) {
+    struct EstadiaList *list = empty_estadia_list();
+    
+    for (int i = 0; i < QTD_ESTADIAS; i++) {
+        if (strcmp(ESTADIAS[i].codigo_cliente, codigo_cliente) == 0) {
+            add_estadia(list, ESTADIAS[i]);
+        }
+    }
+
+    return list;
+}
+
+struct Funcionario *find_funcionario(char *codigo_funcionario) {
+    for (int i = 0; i < QTD_FUNCIONARIOS; i++) {
+        if (strcmp(FUNCIONARIOS[i].codigo, codigo_funcionario) == 0) {
+            return &FUNCIONARIOS[i];
+        }
+    }
+}
+
+void print_quarto(struct Quarto *quarto) {
+    printf(
+        "Quarto{ %d  *  %d  *  %d  *  %d }\n", 
+        quarto->numero_quarto, 
+        quarto->qtd_hospedes,
+        quarto->valor_diaria, 
+        quarto->status
+    );
+}
+
+void print_cliente(struct Cliente *cliente) {
+    printf(
+        "Cliente{ %s  *  %s  *  %s  *  %s }\n", 
+        cliente->codigo, 
+        cliente->nome, 
+        cliente->telefone,
+        cliente->endereco
+    );
+}
+
+void print_estadia(struct Estadia *estadia) {
+    printf(
+        "Estadia{ %s  *  %d  *  %d  *  %ld  *  %ld  *  %s }\n", 
+        estadia->codigo, 
+        estadia->numero_quarto,
+        estadia->qtd_diarias, 
+        estadia->data_entrada, 
+        estadia->data_saida, 
+        estadia->codigo_cliente
+    );
+}
+
+void print_funcionario(struct Funcionario *funcionario) {
+    printf(
+        "Funcionario{ %s  *  %s  *  %s  *  %s  *  %d }\n", 
+        funcionario->codigo, 
+        funcionario->nome,
+        funcionario->telefone, 
+        funcionario->cargo, 
+        funcionario->salario
+    );
+}
 
 void dar_baixa(char *codigo_estadia) {
+    struct Estadia *estadia = find_estadia(codigo_estadia);
 
+    struct Quarto *quarto = find_quarto(estadia->numero_quarto);
+
+    quarto->status = DESOCUPADO;
+    float total = (estadia->qtd_diarias * quarto->valor_diaria) / 100.0;
+    printf("Total a ser pago: R$ %.2f\n", total);
+}
+
+void show_pontos_fidelidade(char *codigo_cliente) {
+    struct EstadiaList *estadias = find_estadias_by_cliente("70708bd1-8539-400d-86c6-355db85362b2");
+    int diarias = 0;
+    for (int i = 0; i < estadias->size; i++) {
+        diarias += estadias->elements[i].qtd_diarias;
+    }
+    int pontos = diarias * 10;
+    printf("Pontos de fidelidade acumulados: %d\n", pontos);
+}
+
+int menu() {
+    int opcao;
+    printf("Escolha uma das opcoes abaixo:\n");
+    printf("    [ 0 ] SAIR\n");
+    printf("    [ 1 ] Buscar quarto pelo numero\n");
+    printf("    [ 2 ] Buscar cliente pelo codigo\n");
+    printf("    [ 3 ] Buscar estadia pelo codigo\n");
+    printf("    [ 4 ] Buscar funcionario pelo codigo\n");
+    printf("    [ 5 ] Listas todos os quartos\n");
+    printf("    [ 6 ] Listas todos os clientes\n");
+    printf("    [ 7 ] Listas todos as estadias\n");
+    printf("    [ 8 ] Listas todos os funcionarios\n");
+    printf("    [ 9 ] Cadastrar cliente\n");
+    printf("    [ 10 ] Cadastrar estadia\n");
+    printf("    [ 11 ] Cadastrar funcionario\n");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
+void run_action(int action) {
+    switch (action) {
+    case 1:
+        int n; 
+        printf("Entre com o numero do quarto: ");
+        scanf("%d", &n);
+        print_quarto(find_quarto(n));
+        break;
+    
+    case 2:
+        char codigo[37]; 
+        printf("Entre com o codigo do cliente: ");
+        scanf("%s", codigo);
+        print_cliente(find_cliente(codigo));
+        break;
+
+    case 3:
+        /* code */
+        break;
+
+    case 4:
+        /* code */
+        break;
+    
+    case 5:
+        /* code */
+        break;
+    
+    case 6:
+        /* code */
+        break;
+    
+    case 7:
+        /* code */
+        break;
+    
+    case 8:
+        /* code */
+        break;
+    
+    case 9:
+        /* code */
+        break;
+    
+    case 10:
+        /* code */
+        break;
+    
+    case 11:
+        /* code */
+        break;
+    
+    default:
+        printf("Acao invalida!\n");
+    }
 }
 
 int main() {
+    load_quartos();
     load_clientes();
-    for (int i = 0; i < QTD_CLIENTES; i++) {
-        struct Cliente cliente = CLIENTES[i];
-        printf("%d:  %s  *  %s  *  %s  *  %s\n", i, cliente.codigo, cliente.nome, cliente.telefone, cliente.endereco);
+    load_estadias();
+    load_funcionarios();
+
+    while (true) {
+        int action = menu();
+        printf("%d\n", action);
+        if (action == 0) {
+            break;
+        }
+        run_action(action);
     }
+
+    // print_quarto(find_quarto(1));
+    // print_cliente(find_cliente("fd01a1a1-1b08-4434-9cdc-f4d54112e582"));
+    // print_estadia(find_estadia("a5540727-681c-4cb4-bae8-d3c3b8780d7a"));
+    // print_funcionario(find_funcionario("7ea66bde-26a2-444a-8ca0-21daaf8b035a"));
+    // criar_cliente();
+    // criar_estadia();
+    // criar_funcionario();
+    // dar_baixa("901e8c2d-5f6a-439b-9ff3-c818c23e824e");
+    // show_pontos_fidelidade("70708bd1-8539-400d-86c6-355db85362b2");
+    save_clientes();
+    save_estadias();
+    save_funcionarios();
 }
