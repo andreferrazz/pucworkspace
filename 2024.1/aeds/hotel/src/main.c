@@ -456,6 +456,8 @@ int menu() {
     printf("    [ 10 ] Cadastrar estadia\n");
     printf("    [ 11 ] Cadastrar funcionario\n");
     scanf("%d", &opcao);
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
     return opcao;
 }
 
