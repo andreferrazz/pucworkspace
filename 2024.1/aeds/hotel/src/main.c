@@ -502,6 +502,7 @@ int menu() {
     printf("    [ 9 ] Cadastrar cliente\n");
     printf("    [ 10 ] Cadastrar estadia\n");
     printf("    [ 11 ] Cadastrar funcionario\n");
+    printf("    [ 12 ] Mostrar pontos de fidelidade\n");
     scanf("%d", &opcao);
     int c;
     while ((c = getchar()) != '\n' && c != EOF) { }
@@ -562,6 +563,12 @@ void run_action(int action) {
     
     case 11:
         criar_funcionario();
+        break;
+
+    case 12:
+        printf("Entre com o codigo do cliente: ");
+        scanf("%s", codigo);
+        show_pontos_fidelidade(codigo);
         break;
     
     default:
