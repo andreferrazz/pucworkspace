@@ -228,30 +228,33 @@ void load_funcionarios() {
 }
 
 void save_clientes() {
-    FILE *file = fopen("db/cliente", "w");
+    FILE *file = fopen("db/clientes", "wb");
     for (int i = 0; i < QTD_CLIENTES; i++) {
         struct Cliente cliente = CLIENTES[i];
-        fprintf(file, "%s;%s;%s;%s\n", cliente.codigo, cliente.nome, cliente.telefone, cliente.endereco);
+        fwrite(&cliente, sizeof(cliente), 1, file);
+        // fprintf(file, "%s;%s;%s;%s\n", cliente.codigo, cliente.nome, cliente.telefone, cliente.endereco);
     }
     fclose(file);
 }
 
 void save_estadias() {
-    FILE *file = fopen("db/estadia", "w");
+    FILE *file = fopen("db/estadias", "wb");
     for (int i = 0; i < QTD_ESTADIAS; i++) {
         struct Estadia estadia = ESTADIAS[i];
-        fprintf(file, "%s;%d;%d;%ld;%ld;%s\n", estadia.codigo, estadia.numero_quarto, estadia.qtd_diarias,
-                estadia.data_entrada, estadia.data_saida, estadia.codigo_cliente);
+        fwrite(&estadia, sizeof(estadia), 1, file);
+        // fprintf(file, "%s;%d;%d;%ld;%ld;%s\n", estadia.codigo, estadia.numero_quarto, estadia.qtd_diarias,
+        //         estadia.data_entrada, estadia.data_saida, estadia.codigo_cliente);
     }
     fclose(file);
 }
 
 void save_funcionarios() {
-    FILE *file = fopen("db/funcionario", "w");
+    FILE *file = fopen("db/funcionarios", "wb");
     for (int i = 0; i < QTD_FUNCIONARIOS; i++) {
         struct Funcionario funcionario = FUNCIONARIOS[i];
-        fprintf(file, "%s;%s;%s;%s;%d\n", funcionario.codigo, funcionario.nome, funcionario.telefone, funcionario.cargo,
-                funcionario.salario);
+        fwrite(&funcionario, sizeof(funcionario), 1, file);
+        // fprintf(file, "%s;%s;%s;%s;%d\n", funcionario.codigo, funcionario.nome, funcionario.telefone, funcionario.cargo,
+        //         funcionario.salario);
     }
     fclose(file);
 }
@@ -286,6 +289,25 @@ void criar_estadia() {
     ESTADIAS[QTD_ESTADIAS++] = estadia;
 }
 
+char *parse_cargo(int e) {
+    switch (e) {
+    case 1:
+        return "CARGO_1";
+        break;
+
+    case 2:
+        return "CARGO_2";
+        break;
+
+    case 3:
+        return "CARGO_3";
+        break;
+
+    default:
+        break;
+    }
+}
+
 void criar_funcionario() {
     char *nome = get_line("Entre com o nome: ");
     char *telefone = get_line("Entre com o telefone: ");
@@ -296,7 +318,7 @@ void criar_funcionario() {
     strcpy(funcionario.codigo, generate_uuid());
     strcpy(funcionario.nome, nome);
     strcpy(funcionario.telefone, telefone);
-    strcpy(funcionario.cargo, cargo);
+    strcpy(funcionario.cargo, parse_cargo(atoi(cargo)));
     funcionario.salario = (atof(salario) * 100);
     FUNCIONARIOS[QTD_FUNCIONARIOS++] = funcionario;
 }
