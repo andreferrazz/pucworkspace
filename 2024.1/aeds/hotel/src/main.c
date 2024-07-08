@@ -35,6 +35,24 @@ struct Quarto {
     int status;
 } Quarto;
 
+struct QuartoList {
+    int capacity;
+    int size;
+    struct Quarto *elements;
+} QuartoList;
+
+struct QuartoList *empty_quarto_list() {
+    struct QuartoList *list = malloc(sizeof(struct QuartoList));
+    list->capacity = 10;
+    list->size = 0;
+    list->elements = malloc(list->capacity * sizeof(struct Quarto));
+    return list;
+}
+
+void add_quarto(struct QuartoList *list, struct Quarto element) {
+    list->elements[list->size++] = element;
+}
+
 struct ClienteList {
     int capacity;
     int size;
@@ -231,76 +249,42 @@ void save_funcionarios() {
     fclose(file);
 }
 
-void criar_cliente() {
-    char *nome = get_line("Entre com o nome: ");
-    char *telefone = get_line("Entre com o telefone: ");
-    char *endereco = get_line("Entre com o endereco: ");
-
-    struct Cliente cliente;
-    strcpy(cliente.codigo, generate_uuid());
-    strcpy(cliente.nome, nome);
-    strcpy(cliente.telefone, telefone);
-    strcpy(cliente.endereco, endereco);
-    CLIENTES[QTD_CLIENTES++] = cliente;
-}
-
-void criar_estadia() {
-    char *data_entrada = get_line("Data de entrada (DD/MM/AAAA): ");
-    char *data_saida = get_line("Data de saida (DD/MM/AAAA): ");
-    char *codigo_cliente = get_line("Entre com o codigo do cliente: ");
-    // TODO: get quartos disponiveis
-    char *numero_quarto = get_line("  [1] QUARTO_1\n  [2] QUARTO_2\n  [3] QUARTO_3\nEscolha o quarto: ");
-
-    struct Estadia estadia;
-    strcpy(estadia.codigo, generate_uuid());
-    estadia.numero_quarto = atoi(numero_quarto);
-    estadia.data_entrada = parse_date(data_entrada);
-    estadia.data_saida = parse_date(data_saida);
-    estadia.qtd_diarias = (estadia.data_saida - estadia.data_entrada) / (60 * 60 * 24);
-    strcpy(estadia.codigo_cliente, codigo_cliente);
-    ESTADIAS[QTD_ESTADIAS++] = estadia;
-}
-
-char *parse_cargo(int e) {
-    switch (e) {
-    case 1:
-        return "CARGO_1";
-        break;
-
-    case 2:
-        return "CARGO_2";
-        break;
-
-    case 3:
-        return "CARGO_3";
-        break;
-
-    default:
-        break;
-    }
-}
-
-void criar_funcionario() {
-    char *nome = get_line("Entre com o nome: ");
-    char *telefone = get_line("Entre com o telefone: ");
-    char *cargo = get_line("  [1] CARGO_1\n  [2] CARGO_2\n  [3] CARGO_3\nEscolha o cargo: ");
-    char *salario = get_line("Entre com o salario: ");
-
-    struct Funcionario funcionario;
-    strcpy(funcionario.codigo, generate_uuid());
-    strcpy(funcionario.nome, nome);
-    strcpy(funcionario.telefone, telefone);
-    strcpy(funcionario.cargo, parse_cargo(atoi(cargo)));
-    funcionario.salario = (atof(salario) * 100);
-    FUNCIONARIOS[QTD_FUNCIONARIOS++] = funcionario;
-}
-
 struct Quarto *find_quarto(int numero_quarto) {
     for (int i = 0; i < QTD_QUARTOS; i++) {
         if (QUARTOS[i].numero_quarto == numero_quarto) {
             return &QUARTOS[i];
         }
     }
+}
+
+struct QuartoList *find_quartos_disponiveis(int qtd_hospedes, time_t data_entrada, time_t data_saida) {
+    struct QuartoList *list = empty_quarto_list();
+    
+    for (int i = 0; i < QTD_QUARTOS; i++) {
+        struct Quarto quarto = QUARTOS[i];
+        bool is_available = true;
+
+        for (int j = 0; j < QTD_ESTADIAS; j++) {
+            struct Estadia e = ESTADIAS[j];
+            if (e.numero_quarto == quarto.numero_quarto) {
+                if (e.data_entrada >= data_entrada && e.data_entrada <= data_saida) {
+                    is_available = false;
+                    break;
+                }
+
+                if (e.data_saida >= data_entrada && e.data_saida <= data_saida) {
+                    is_available = false;
+                    break;
+                }
+            }
+        }
+
+        if (is_available && QUARTOS[i].qtd_hospedes >= qtd_hospedes) {
+            add_quarto(list, QUARTOS[i]);
+        }
+    }
+
+    return list;
 }
 
 struct Cliente *find_cliente(char *codigo_cliente) {
@@ -337,6 +321,78 @@ struct Funcionario *find_funcionario(char *codigo_funcionario) {
             return &FUNCIONARIOS[i];
         }
     }
+}
+
+void criar_cliente() {
+    char *nome = get_line("Entre com o nome: ");
+    char *telefone = get_line("Entre com o telefone: ");
+    char *endereco = get_line("Entre com o endereco: ");
+
+    struct Cliente cliente;
+    strcpy(cliente.codigo, generate_uuid());
+    strcpy(cliente.nome, nome);
+    strcpy(cliente.telefone, telefone);
+    strcpy(cliente.endereco, endereco);
+    CLIENTES[QTD_CLIENTES++] = cliente;
+}
+
+void criar_estadia() {
+    char *codigo_cliente = get_line("Entre com o codigo do cliente: ");
+    int qtd_hospedes = atoi(get_line("Entre com a quantidade de hospedes: "));
+    time_t data_entrada = parse_date(get_line("Data de entrada (DD/MM/AAAA): "));
+    time_t data_saida = parse_date(get_line("Data de saida (DD/MM/AAAA): "));
+    struct QuartoList *list = find_quartos_disponiveis(qtd_hospedes, data_entrada, data_saida);
+    printf("\nQuartos\n\n");
+    for (int i = 0; i < list->size; i++) {
+        printf("    [ %d ] { qtd_hospedes: %d, preco_diaria: %.2f }\n", 
+        list->elements[i].numero_quarto,
+        list->elements[i].qtd_hospedes,
+        list->elements[i].valor_diaria / 100.0);
+    }
+    int numero_quarto = atoi(get_line("\nEscolha um dos quartos acima: "));
+
+    struct Estadia estadia;
+    strcpy(estadia.codigo, generate_uuid());
+    strcpy(estadia.codigo_cliente, codigo_cliente);
+    estadia.data_entrada = data_entrada;
+    estadia.data_saida = data_saida;
+    estadia.numero_quarto = numero_quarto;
+    estadia.qtd_diarias = (estadia.data_saida - estadia.data_entrada) / (60 * 60 * 24);
+    ESTADIAS[QTD_ESTADIAS++] = estadia;
+}
+
+char *parse_cargo(int e) {
+    switch (e) {
+    case 1:
+        return "CARGO_1";
+        break;
+
+    case 2:
+        return "CARGO_2";
+        break;
+
+    case 3:
+        return "CARGO_3";
+        break;
+
+    default:
+        break;
+    }
+}
+
+void criar_funcionario() {
+    char *nome = get_line("Entre com o nome: ");
+    char *telefone = get_line("Entre com o telefone: ");
+    char *cargo = get_line("  [1] CARGO_1\n  [2] CARGO_2\n  [3] CARGO_3\nEscolha o cargo: ");
+    char *salario = get_line("Entre com o salario: ");
+
+    struct Funcionario funcionario;
+    strcpy(funcionario.codigo, generate_uuid());
+    strcpy(funcionario.nome, nome);
+    strcpy(funcionario.telefone, telefone);
+    strcpy(funcionario.cargo, parse_cargo(atoi(cargo)));
+    funcionario.salario = (atof(salario) * 100);
+    FUNCIONARIOS[QTD_FUNCIONARIOS++] = funcionario;
 }
 
 void print_quarto(struct Quarto *quarto) {
