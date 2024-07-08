@@ -147,24 +147,17 @@ time_t parse_date(char *str) {
 }
 
 void load_quartos() {
-    FILE *file = fopen("db/quarto", "r");
-    QUARTOS = malloc(10 * sizeof(struct Quarto));
+    FILE *file = fopen("db/quartos", "rb");
+    QUARTOS = malloc(20 * sizeof(struct Quarto));
     QTD_QUARTOS = 0;
-    int numero_quarto;
-    int qtd_hospedes;
-    int valor_diaria;
-    int status;
     while (true) {
-        int a = fscanf(file, "%d;%d;%d;%d\n", &numero_quarto, &qtd_hospedes, &valor_diaria, &status);
-        if (a != 4) {
+        struct Quarto *quarto = malloc(sizeof(struct Quarto));
+        int a = fread(quarto, sizeof(struct Quarto), 1, file);
+        if (a == 0) {
+            free(quarto);
             break;
         }
-        struct Quarto quarto;
-        quarto.numero_quarto = numero_quarto;
-        quarto.qtd_hospedes = qtd_hospedes;
-        quarto.valor_diaria = valor_diaria;
-        quarto.status = status;
-        QUARTOS[QTD_QUARTOS++] = quarto;
+        QUARTOS[QTD_QUARTOS++] = *quarto;
     }
     fclose(file);
 }
@@ -217,12 +210,20 @@ void load_funcionarios() {
     fclose(file);
 }
 
+void save_quartos() {
+    FILE *file = fopen("db/quartos", "wb");
+    for (int i = 0; i < QTD_QUARTOS; i++) {
+        struct Quarto quarto = QUARTOS[i];
+        fwrite(&quarto, sizeof(quarto), 1, file);
+    }
+    fclose(file);
+}
+
 void save_clientes() {
     FILE *file = fopen("db/clientes", "wb");
     for (int i = 0; i < QTD_CLIENTES; i++) {
         struct Cliente cliente = CLIENTES[i];
         fwrite(&cliente, sizeof(cliente), 1, file);
-        // fprintf(file, "%s;%s;%s;%s\n", cliente.codigo, cliente.nome, cliente.telefone, cliente.endereco);
     }
     fclose(file);
 }
@@ -232,8 +233,6 @@ void save_estadias() {
     for (int i = 0; i < QTD_ESTADIAS; i++) {
         struct Estadia estadia = ESTADIAS[i];
         fwrite(&estadia, sizeof(estadia), 1, file);
-        // fprintf(file, "%s;%d;%d;%ld;%ld;%s\n", estadia.codigo, estadia.numero_quarto, estadia.qtd_diarias,
-        //         estadia.data_entrada, estadia.data_saida, estadia.codigo_cliente);
     }
     fclose(file);
 }
@@ -243,8 +242,6 @@ void save_funcionarios() {
     for (int i = 0; i < QTD_FUNCIONARIOS; i++) {
         struct Funcionario funcionario = FUNCIONARIOS[i];
         fwrite(&funcionario, sizeof(funcionario), 1, file);
-        // fprintf(file, "%s;%s;%s;%s;%d\n", funcionario.codigo, funcionario.nome, funcionario.telefone, funcionario.cargo,
-        //         funcionario.salario);
     }
     fclose(file);
 }
@@ -586,15 +583,7 @@ int main() {
         run_action(action);
     }
 
-    // print_quarto(find_quarto(1));
-    // print_cliente(find_cliente("fd01a1a1-1b08-4434-9cdc-f4d54112e582"));
-    // print_estadia(find_estadia("a5540727-681c-4cb4-bae8-d3c3b8780d7a"));
-    // print_funcionario(find_funcionario("7ea66bde-26a2-444a-8ca0-21daaf8b035a"));
-    // criar_cliente();
-    // criar_estadia();
-    // criar_funcionario();
-    // dar_baixa("901e8c2d-5f6a-439b-9ff3-c818c23e824e");
-    // show_pontos_fidelidade("70708bd1-8539-400d-86c6-355db85362b2");
+    save_quartos();
     save_clientes();
     save_estadias();
     save_funcionarios();
