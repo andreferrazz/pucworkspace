@@ -388,6 +388,38 @@ void print_funcionario(struct Funcionario *funcionario) {
     );
 }
 
+void show_quartos() {
+    printf("\n******** QUARTOS ********\n\n");
+    for(int i = 0; i < QTD_QUARTOS; i++) {
+        print_quarto(&QUARTOS[i]);
+    }
+    printf("\n*************************\n");
+}
+
+void show_clientes() {
+    printf("\n******** CLIENTES ********\n\n");
+    for(int i = 0; i < QTD_CLIENTES; i++) {
+        print_cliente(&CLIENTES[i]);
+    }
+    printf("\n**************************\n");
+}
+
+void show_estadias() {
+    printf("\n******** ESTADIAS ********\n\n");
+    for(int i = 0; i < QTD_ESTADIAS; i++) {
+        print_estadia(&ESTADIAS[i]);
+    }
+    printf("\n**************************\n");
+}
+
+void show_funcionarios() {
+    printf("\n******** FUNCIONARIOS ********\n\n");
+    for(int i = 0; i < QTD_FUNCIONARIOS; i++) {
+        print_funcionario(&FUNCIONARIOS[i]);
+    }
+    printf("\n******************************\n");
+}
+
 void dar_baixa(char *codigo_estadia) {
     struct Estadia *estadia = find_estadia(codigo_estadia);
 
@@ -410,7 +442,7 @@ void show_pontos_fidelidade(char *codigo_cliente) {
 
 int menu() {
     int opcao;
-    printf("Escolha uma das opcoes abaixo:\n");
+    printf("\nEscolha uma das opcoes abaixo:\n");
     printf("    [ 0 ] SAIR\n");
     printf("    [ 1 ] Buscar quarto pelo numero\n");
     printf("    [ 2 ] Buscar cliente pelo codigo\n");
@@ -428,55 +460,59 @@ int menu() {
 }
 
 void run_action(int action) {
+    int n; 
+    char codigo[37];
     switch (action) {
     case 1:
-        int n; 
         printf("Entre com o numero do quarto: ");
         scanf("%d", &n);
         print_quarto(find_quarto(n));
         break;
     
     case 2:
-        char codigo[37]; 
         printf("Entre com o codigo do cliente: ");
         scanf("%s", codigo);
         print_cliente(find_cliente(codigo));
         break;
 
     case 3:
-        /* code */
+        printf("Entre com o codigo da estadia: ");
+        scanf("%s", codigo);
+        print_estadia(find_estadia(codigo));
         break;
 
     case 4:
-        /* code */
+        printf("Entre com o codigo do funcionario: ");
+        scanf("%s", codigo);
+        print_funcionario(find_funcionario(codigo));
         break;
     
     case 5:
-        /* code */
+        show_quartos();
         break;
     
     case 6:
-        /* code */
+        show_clientes();
         break;
     
     case 7:
-        /* code */
+        show_estadias();
         break;
     
     case 8:
-        /* code */
+        show_funcionarios();
         break;
     
     case 9:
-        /* code */
+        criar_cliente();
         break;
     
     case 10:
-        /* code */
+        criar_estadia();
         break;
     
     case 11:
-        /* code */
+        criar_funcionario();
         break;
     
     default:
@@ -492,7 +528,6 @@ int main() {
 
     while (true) {
         int action = menu();
-        printf("%d\n", action);
         if (action == 0) {
             break;
         }
