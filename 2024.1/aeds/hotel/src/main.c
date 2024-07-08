@@ -203,26 +203,17 @@ void load_estadias() {
 }
 
 void load_funcionarios() {
-    FILE *file = fopen("db/funcionario", "r");
+    FILE *file = fopen("db/funcionarios", "rb");
     FUNCIONARIOS = malloc(10 * sizeof(struct Funcionario));
     QTD_FUNCIONARIOS = 0;
-    char codigo[37];
-    char nome[100];
-    char telefone[30];
-    char cargo[50];
-    int salario;
     while (true) {
-        int a = fscanf(file, "%36[^;];%[^;];%[^;];%[^;];%d\n", codigo, nome, telefone, cargo, &salario);
-        if (a != 5) {
+        struct Funcionario *funcionario = malloc(sizeof(struct Funcionario));
+        int a = fread(funcionario, sizeof(struct Funcionario), 1, file);
+        if (a == 0) {
+            free(funcionario);
             break;
         }
-        struct Funcionario funcionario;
-        strcpy(funcionario.codigo, codigo);
-        strcpy(funcionario.nome, nome);
-        strcpy(funcionario.telefone, telefone);
-        strcpy(funcionario.cargo, cargo);
-        funcionario.salario = salario;
-        FUNCIONARIOS[QTD_FUNCIONARIOS++] = funcionario;
+        FUNCIONARIOS[QTD_FUNCIONARIOS++] = *funcionario;
     }
     fclose(file);
 }
