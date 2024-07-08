@@ -152,59 +152,40 @@ void load_quartos() {
 }
 
 void load_clientes() {
-    FILE *file = fopen("db/cliente", "r");
-    CLIENTES = malloc(10 * sizeof(struct Cliente));
+    FILE *file = fopen("db/clientes", "rb");
+    CLIENTES = malloc(20 * sizeof(struct Cliente));
     QTD_CLIENTES = 0;
-    char codigo[37];
-    char nome[100];
-    char telefone[30];
-    char endereco[100];
     while (true) {
-        int a = fscanf(file, "%36[^;];%[^;];%[^;];%[^\n]\n", codigo, nome, telefone, endereco);
-        if (a != 4) {
+        struct Cliente *cliente = malloc(sizeof(struct Cliente));
+        int a = fread(cliente, sizeof(struct Cliente), 1, file);
+        if (a == 0) {
+            free(cliente);
             break;
         }
-        struct Cliente cliente;
-        strcpy(cliente.codigo, codigo);
-        strcpy(cliente.nome, nome);
-        strcpy(cliente.telefone, telefone);
-        strcpy(cliente.endereco, endereco);
-        CLIENTES[QTD_CLIENTES++] = cliente;
+        CLIENTES[QTD_CLIENTES++] = *cliente;
     }
     fclose(file);
 }
 
 void load_estadias() {
-    FILE *file = fopen("db/estadia", "r");
-    ESTADIAS = malloc(10 * sizeof(struct Estadia));
+    FILE *file = fopen("db/estadias", "rb");
+    ESTADIAS = malloc(20 * sizeof(struct Estadia));
     QTD_ESTADIAS = 0;
-    char codigo[37];
-    int numero_quarto;
-    int qtd_diarias;
-    time_t data_entrada;
-    time_t data_saida;
-    char codigo_cliente[37];
     while (true) {
-        int a = fscanf(file, "%36[^;];%d;%d;%ld;%ld;%36[^\n]\n", codigo, &numero_quarto, &qtd_diarias, &data_entrada,
-                       &data_saida, codigo_cliente);
-        if (a != 6) {
+        struct Estadia *estadia = malloc(sizeof(struct Estadia));
+        int a = fread(estadia, sizeof(struct Estadia), 1, file);
+        if (a == 0) {
+            free(estadia);
             break;
         }
-        struct Estadia estadia;
-        strcpy(estadia.codigo, codigo);
-        estadia.numero_quarto = numero_quarto;
-        estadia.qtd_diarias = qtd_diarias;
-        estadia.data_entrada = data_entrada;
-        estadia.data_saida = data_saida;
-        strcpy(estadia.codigo_cliente, codigo_cliente);
-        ESTADIAS[QTD_ESTADIAS++] = estadia;
+        ESTADIAS[QTD_ESTADIAS++] = *estadia;
     }
     fclose(file);
 }
 
 void load_funcionarios() {
     FILE *file = fopen("db/funcionarios", "rb");
-    FUNCIONARIOS = malloc(10 * sizeof(struct Funcionario));
+    FUNCIONARIOS = malloc(20 * sizeof(struct Funcionario));
     QTD_FUNCIONARIOS = 0;
     while (true) {
         struct Funcionario *funcionario = malloc(sizeof(struct Funcionario));
